@@ -12,8 +12,10 @@ import com_abertamente_cms.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com_abertamente_cms.dto.user.UserDto;
 
 @Service
 public class AuthService {
@@ -68,6 +70,15 @@ public class AuthService {
                     return new TokenRefreshResponse(token, requestRefreshToken);
                 })
                 .orElseThrow(() -> new RuntimeException("Refresh token não está no banco de dados!"));
+    }
+
+    public UserDto getMe() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
+        
+        String role = user.getRoles().stream().findFirst().map(r -> r.getName()).orElse("USER");
+        return new UserDto(user.getId(), user.getName(), user.getEmail(), role);
     }
 
     private AuthResponse authenticateAndGenerateTokens(User user) {

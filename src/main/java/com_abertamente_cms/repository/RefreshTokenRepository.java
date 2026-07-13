@@ -12,5 +12,8 @@ import java.util.UUID;
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID> {
     Optional<RefreshToken> findByToken(String token);
     Optional<RefreshToken> findByUser(User user);
-    int deleteByUser(User user);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM RefreshToken r WHERE r.user = :user")
+    int deleteByUser(@org.springframework.data.repository.query.Param("user") User user);
 }

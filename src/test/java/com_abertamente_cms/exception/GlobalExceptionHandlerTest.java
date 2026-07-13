@@ -10,6 +10,8 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import java.net.URI;
 import java.util.Map;
 
@@ -46,7 +48,8 @@ class GlobalExceptionHandlerTest {
         MethodParameter parameter = new MethodParameter(this.getClass().getDeclaredMethod("setUp"), -1);
         MethodArgumentNotValidException ex = new MethodArgumentNotValidException(parameter, bindingResult);
 
-        ProblemDetail problemDetail = exceptionHandler.handleValidationExceptions(ex);
+        ResponseEntity<Object> response = exceptionHandler.handleMethodArgumentNotValid(ex, HttpHeaders.EMPTY, HttpStatus.BAD_REQUEST, null);
+        ProblemDetail problemDetail = (ProblemDetail) response.getBody();
 
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
@@ -68,7 +71,7 @@ class GlobalExceptionHandlerTest {
         assertNotNull(problemDetail);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), problemDetail.getStatus());
         assertEquals("Erro Interno do Servidor", problemDetail.getTitle());
-        assertEquals("Ocorreu um erro interno inesperado.", problemDetail.getDetail());
+        assertEquals("Ocorreu um erro interno inesperado. Detalhes: Some unexpected error", problemDetail.getDetail());
         assertEquals(URI.create("https://abertamente.net/erros/erro-interno"), problemDetail.getType());
     }
 }

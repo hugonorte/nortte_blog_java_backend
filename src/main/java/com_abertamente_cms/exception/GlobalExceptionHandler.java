@@ -13,9 +13,14 @@ import org.springframework.security.core.AuthenticationException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.http.ResponseEntity;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ProblemDetail handleEntityNotFoundException(EntityNotFoundException ex) {
@@ -25,8 +30,8 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ProblemDetail handleValidationExceptions(MethodArgumentNotValidException ex) {
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "A validação dos dados falhou. Verifique os campos informados.");
         problemDetail.setTitle("Erro de Validação");
         problemDetail.setType(URI.create("https://abertamente.net/erros/validacao-falhou"));
@@ -40,7 +45,7 @@ public class GlobalExceptionHandler {
 
         problemDetail.setProperty("invalid_params", errors);
 
-        return problemDetail;
+        return createResponseEntity(problemDetail, headers, status, request);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
@@ -61,7 +66,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleGenericException(Exception ex) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Ocorreu um erro interno inesperado.");
+        ex.printStackTrace();
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Ocorreu um erro interno inesperado. Detalhes: " + ex.getMessage());
         problemDetail.setTitle("Erro Interno do Servidor");
         problemDetail.setType(URI.create("https://abertamente.net/erros/erro-interno"));
         return problemDetail;
