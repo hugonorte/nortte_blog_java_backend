@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +40,22 @@ public class GlobalExceptionHandler {
 
         problemDetail.setProperty("invalid_params", errors);
 
+        return problemDetail;
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ProblemDetail handleAccessDeniedException(AccessDeniedException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Você não tem permissão para acessar este recurso.");
+        problemDetail.setTitle("Acesso Proibido");
+        problemDetail.setType(URI.create("https://abertamente.net/erros/acesso-proibido"));
+        return problemDetail;
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ProblemDetail handleAuthenticationException(AuthenticationException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Autenticação necessária ou token inválido.");
+        problemDetail.setTitle("Não Autorizado");
+        problemDetail.setType(URI.create("https://abertamente.net/erros/nao-autorizado"));
         return problemDetail;
     }
 
