@@ -8,7 +8,6 @@ public record CategoryRequest(
         @Size(max = 255)
         String name,
 
-        @NotBlank(message = "O slug não pode estar vazio")
         @Size(max = 255)
         String slug,
 

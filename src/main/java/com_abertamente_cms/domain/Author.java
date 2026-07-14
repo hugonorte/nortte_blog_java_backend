@@ -11,9 +11,11 @@ import jakarta.persistence.Table;
 @Table(name = "authors")
 public class Author extends BaseEntity {
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", unique = true, nullable = false)
-    private User user;
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false, unique = true)
+    private String email;
 
     @Column(columnDefinition = "TEXT")
     private String bio;
@@ -30,18 +32,27 @@ public class Author extends BaseEntity {
     public Author() {
     }
 
-    public Author(User user, String bio, String mainTitle) {
-        this.user = user;
+    public Author(String name, String email, String bio, String mainTitle) {
+        this.name = name;
+        this.email = email;
         this.bio = bio;
         this.mainTitle = mainTitle;
     }
 
-    public User getUser() {
-        return user;
+    public String getName() {
+        return name;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getBio() {

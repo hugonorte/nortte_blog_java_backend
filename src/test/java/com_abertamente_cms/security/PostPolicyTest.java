@@ -47,7 +47,7 @@ class PostPolicyTest {
         userAuthor = new User("Author", "author@example.com", "pass");
         ReflectionTestUtils.setField(userAuthor, "id", UUID.randomUUID());
         
-        author = new com_abertamente_cms.domain.Author(userAuthor, "bio", "title");
+        author = new com_abertamente_cms.domain.Author("Author Name", "author@example.com", "bio", "title");
         ReflectionTestUtils.setField(author, "id", UUID.randomUUID());
 
         otherUser = new User("Other", "other@example.com", "pass");

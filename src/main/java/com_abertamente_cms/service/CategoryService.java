@@ -35,8 +35,12 @@ public class CategoryService {
 
     @Transactional
     public CategoryResponse create(CategoryRequest request) {
-        if (categoryRepository.findBySlug(request.slug()).isPresent() || categoryRepository.findByName(request.name()).isPresent()) {
-            throw new IllegalArgumentException("Categoria com mesmo nome ou slug já existe.");
+        if (categoryRepository.findByName(request.name()).isPresent()) {
+            throw new IllegalArgumentException("Categoria com mesmo nome já existe.");
+        }
+
+        if (request.slug() != null && !request.slug().isBlank() && categoryRepository.findBySlug(request.slug()).isPresent()) {
+            throw new IllegalArgumentException("Categoria com mesmo slug já existe.");
         }
 
         Category category = new Category(request.name(), request.slug(), request.description());
@@ -53,7 +57,7 @@ public class CategoryService {
             throw new IllegalArgumentException("Nome da categoria já está em uso.");
         }
 
-        if (!category.getSlug().equals(request.slug()) && categoryRepository.findBySlug(request.slug()).isPresent()) {
+        if (request.slug() != null && !request.slug().isBlank() && !java.util.Objects.equals(category.getSlug(), request.slug()) && categoryRepository.findBySlug(request.slug()).isPresent()) {
             throw new IllegalArgumentException("Slug da categoria já está em uso.");
         }
 

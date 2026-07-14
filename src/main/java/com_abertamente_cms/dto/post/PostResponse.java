@@ -32,7 +32,7 @@ public record PostResponse(
                 post.getImagePath(),
                 post.getStatus(),
                 post.getAuthor().getId(),
-                post.getAuthor().getUser().getName(),
+                post.getAuthor().getName(),
                 CategoryResponse.fromEntity(post.getCategory()),
                 post.getPublishedAt(),
                 post.getCreatedAt(),

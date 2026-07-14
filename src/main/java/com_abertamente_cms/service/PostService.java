@@ -56,12 +56,8 @@ public class PostService {
         Category category = categoryRepository.findById(request.categoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
 
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário logado não encontrado no banco de dados."));
-                
-        com_abertamente_cms.domain.Author author = authorRepository.findByUser(user)
-                .orElseGet(() -> authorRepository.save(new com_abertamente_cms.domain.Author(user, "", "")));
+        com_abertamente_cms.domain.Author author = authorRepository.findById(request.authorId())
+                .orElseThrow(() -> new ResourceNotFoundException("Autor não encontrado."));
 
         Post post = new Post(request.title(), request.slug(), request.content(), request.tldr(), author, category, request.publishedAt());
         post.setImagePath(request.imagePath());

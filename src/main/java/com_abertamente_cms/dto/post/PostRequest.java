@@ -24,6 +24,9 @@ public record PostRequest(
         java.time.Instant publishedAt,
 
         @NotNull(message = "A categoria é obrigatória")
-        UUID categoryId
+        UUID categoryId,
+        
+        @NotNull(message = "O autor é obrigatório")
+        UUID authorId
 ) {
 }

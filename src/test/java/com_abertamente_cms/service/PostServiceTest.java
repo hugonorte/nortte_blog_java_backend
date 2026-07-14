@@ -66,7 +66,7 @@ class PostServiceTest {
         user = new User("Jane", "jane@example.com", "pass");
         ReflectionTestUtils.setField(user, "id", UUID.randomUUID());
 
-        author = new com_abertamente_cms.domain.Author(user, "Bio", "Dev");
+        author = new com_abertamente_cms.domain.Author("Author Name", "author@example.com", "Bio", "Dev");
         ReflectionTestUtils.setField(author, "id", UUID.randomUUID());
 
         category = new Category("Tech", "tech", "desc");
@@ -79,14 +79,9 @@ class PostServiceTest {
 
     @Test
     void shouldCreatePost() {
-        PostRequest request = new PostRequest("Título Novo", "titulo-novo", "conteudo", "tldr", "/uploads/posts/cover.jpg", java.time.Instant.now(), category.getId());
+        PostRequest request = new PostRequest("Título Novo", "titulo-novo", "conteudo", "tldr", "/uploads/posts/cover.jpg", java.time.Instant.now(), category.getId(), author.getId());
 
-        SecurityContextHolder.setContext(securityContext);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getName()).thenReturn("jane@example.com");
-
-        when(userRepository.findByEmail("jane@example.com")).thenReturn(Optional.of(user));
-        when(authorRepository.findByUser(user)).thenReturn(Optional.of(author));
+        when(authorRepository.findById(author.getId())).thenReturn(Optional.of(author));
         when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
         when(postRepository.findBySlug(request.slug())).thenReturn(Optional.empty());
         when(postRepository.save(any(Post.class))).thenAnswer(i -> i.getArgument(0));
@@ -100,7 +95,7 @@ class PostServiceTest {
 
     @Test
     void shouldUpdatePost() {
-        PostRequest request = new PostRequest("Título Edit", "titulo-edit", "conteudo edit", "tldr edit", "/uploads/posts/cover.jpg", java.time.Instant.now(), category.getId());
+        PostRequest request = new PostRequest("Título Edit", "titulo-edit", "conteudo edit", "tldr edit", "/uploads/posts/cover.jpg", java.time.Instant.now(), category.getId(), author.getId());
 
         when(postRepository.findById(postId)).thenReturn(Optional.of(post));
         when(postRepository.findBySlug(request.slug())).thenReturn(Optional.empty());

@@ -61,7 +61,7 @@ class CategoryServiceTest {
         when(categoryRepository.findBySlug(request.slug())).thenReturn(Optional.of(category));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> categoryService.create(request));
-        assertEquals("Categoria com mesmo nome ou slug já existe.", exception.getMessage());
+        assertEquals("Categoria com mesmo slug já existe.", exception.getMessage());
     }
 
     @Test
