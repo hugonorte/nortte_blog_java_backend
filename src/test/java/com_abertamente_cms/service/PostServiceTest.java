@@ -6,6 +6,7 @@ import com_abertamente_cms.domain.PostStatus;
 import com_abertamente_cms.domain.User;
 import com_abertamente_cms.dto.post.PostRequest;
 import com_abertamente_cms.dto.post.PostResponse;
+import com_abertamente_cms.repository.AuthorRepository;
 import com_abertamente_cms.repository.CategoryRepository;
 import com_abertamente_cms.repository.PostRepository;
 import com_abertamente_cms.repository.UserRepository;
@@ -43,6 +44,9 @@ class PostServiceTest {
     private UserRepository userRepository;
 
     @Mock
+    private AuthorRepository authorRepository;
+
+    @Mock
     private SecurityContext securityContext;
 
     @Mock
@@ -51,33 +55,38 @@ class PostServiceTest {
     @InjectMocks
     private PostService postService;
 
-    private User author;
+    private User user;
+    private com_abertamente_cms.domain.Author author;
     private Category category;
     private Post post;
     private UUID postId;
 
     @BeforeEach
     void setUp() {
-        author = new User("Jane", "jane@example.com", "pass");
+        user = new User("Jane", "jane@example.com", "pass");
+        ReflectionTestUtils.setField(user, "id", UUID.randomUUID());
+
+        author = new com_abertamente_cms.domain.Author(user, "Bio", "Dev");
         ReflectionTestUtils.setField(author, "id", UUID.randomUUID());
 
         category = new Category("Tech", "tech", "desc");
         ReflectionTestUtils.setField(category, "id", UUID.randomUUID());
 
         postId = UUID.randomUUID();
-        post = new Post("Título", "titulo", "conteudo", author, category);
+        post = new Post("Título", "titulo", "conteudo", "tldr", author, category, java.time.Instant.now());
         ReflectionTestUtils.setField(post, "id", postId);
     }
 
     @Test
     void shouldCreatePost() {
-        PostRequest request = new PostRequest("Título Novo", "titulo-novo", "conteudo", "/uploads/posts/cover.jpg", category.getId());
+        PostRequest request = new PostRequest("Título Novo", "titulo-novo", "conteudo", "tldr", "/uploads/posts/cover.jpg", java.time.Instant.now(), category.getId());
 
         SecurityContextHolder.setContext(securityContext);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getName()).thenReturn("jane@example.com");
 
-        when(userRepository.findByEmail("jane@example.com")).thenReturn(Optional.of(author));
+        when(userRepository.findByEmail("jane@example.com")).thenReturn(Optional.of(user));
+        when(authorRepository.findByUser(user)).thenReturn(Optional.of(author));
         when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
         when(postRepository.findBySlug(request.slug())).thenReturn(Optional.empty());
         when(postRepository.save(any(Post.class))).thenAnswer(i -> i.getArgument(0));
@@ -91,7 +100,7 @@ class PostServiceTest {
 
     @Test
     void shouldUpdatePost() {
-        PostRequest request = new PostRequest("Título Edit", "titulo-edit", "conteudo edit", "/uploads/posts/cover.jpg", category.getId());
+        PostRequest request = new PostRequest("Título Edit", "titulo-edit", "conteudo edit", "tldr edit", "/uploads/posts/cover.jpg", java.time.Instant.now(), category.getId());
 
         when(postRepository.findById(postId)).thenReturn(Optional.of(post));
         when(postRepository.findBySlug(request.slug())).thenReturn(Optional.empty());

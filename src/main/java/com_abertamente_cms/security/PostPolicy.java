@@ -37,7 +37,7 @@ public class PostPolicy {
         }
 
         User currentUser = (User) auth.getPrincipal();
-        return post.getAuthor().getId().equals(currentUser.getId());
+        return post.getAuthor().getUser().getId().equals(currentUser.getId());
     }
 
     /**

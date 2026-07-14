@@ -7,6 +7,7 @@ import com_abertamente_cms.domain.User;
 import com_abertamente_cms.dto.post.PostRequest;
 import com_abertamente_cms.dto.post.PostResponse;
 import com_abertamente_cms.exception.ResourceNotFoundException;
+import com_abertamente_cms.repository.AuthorRepository;
 import com_abertamente_cms.repository.CategoryRepository;
 import com_abertamente_cms.repository.PostRepository;
 import com_abertamente_cms.repository.UserRepository;
@@ -25,11 +26,13 @@ public class PostService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final AuthorRepository authorRepository;
 
-    public PostService(PostRepository postRepository, CategoryRepository categoryRepository, UserRepository userRepository) {
+    public PostService(PostRepository postRepository, CategoryRepository categoryRepository, UserRepository userRepository, AuthorRepository authorRepository) {
         this.postRepository = postRepository;
         this.categoryRepository = categoryRepository;
         this.userRepository = userRepository;
+        this.authorRepository = authorRepository;
     }
 
     @Transactional(readOnly = true)
@@ -54,10 +57,13 @@ public class PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
 
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        User author = userRepository.findByEmail(userEmail)
+        User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário logado não encontrado no banco de dados."));
+                
+        com_abertamente_cms.domain.Author author = authorRepository.findByUser(user)
+                .orElseGet(() -> authorRepository.save(new com_abertamente_cms.domain.Author(user, "", "")));
 
-        Post post = new Post(request.title(), request.slug(), request.content(), author, category);
+        Post post = new Post(request.title(), request.slug(), request.content(), request.tldr(), author, category, request.publishedAt());
         post.setImagePath(request.imagePath());
         post = postRepository.save(post);
 
@@ -80,8 +86,10 @@ public class PostService {
         post.setTitle(request.title());
         post.setSlug(request.slug());
         post.setContent(request.content());
+        post.setTldr(request.tldr());
         post.setImagePath(request.imagePath());
         post.setCategory(category);
+        post.setPublishedAt(request.publishedAt());
 
         return PostResponse.fromEntity(postRepository.save(post));
     }

@@ -36,14 +36,18 @@ class PostPolicyTest {
     @InjectMocks
     private PostPolicy postPolicy;
 
-    private User author;
+    private User userAuthor;
+    private com_abertamente_cms.domain.Author author;
     private User otherUser;
     private Post post;
     private UUID postId;
 
     @BeforeEach
     void setUp() {
-        author = new User("Author", "author@example.com", "pass");
+        userAuthor = new User("Author", "author@example.com", "pass");
+        ReflectionTestUtils.setField(userAuthor, "id", UUID.randomUUID());
+        
+        author = new com_abertamente_cms.domain.Author(userAuthor, "bio", "title");
         ReflectionTestUtils.setField(author, "id", UUID.randomUUID());
 
         otherUser = new User("Other", "other@example.com", "pass");
@@ -79,7 +83,7 @@ class PostPolicyTest {
         doReturn(Collections.singletonList(new SimpleGrantedAuthority("ROLE_AUTHOR")))
                 .when(authentication).getAuthorities();
         when(postRepository.findById(postId)).thenReturn(Optional.of(post));
-        when(authentication.getPrincipal()).thenReturn(author);
+        when(authentication.getPrincipal()).thenReturn(userAuthor);
 
         assertTrue(postPolicy.canManage(authentication, postId));
     }

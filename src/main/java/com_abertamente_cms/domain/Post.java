@@ -11,6 +11,8 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "posts")
 @SQLDelete(sql = "UPDATE posts SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
@@ -24,10 +26,16 @@ public class Post extends BaseEntity {
     private String slug;
 
     @Column(columnDefinition = "TEXT")
+    private String tldr;
+
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "image_path")
     private String imagePath;
+
+    @Column(name = "published_at")
+    private Instant publishedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -35,7 +43,7 @@ public class Post extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "author_id", nullable = false)
-    private User author;
+    private Author author;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category_id", nullable = false)
@@ -44,12 +52,14 @@ public class Post extends BaseEntity {
     public Post() {
     }
 
-    public Post(String title, String slug, String content, User author, Category category) {
+    public Post(String title, String slug, String content, String tldr, Author author, Category category, Instant publishedAt) {
         this.title = title;
         this.slug = slug;
         this.content = content;
+        this.tldr = tldr;
         this.author = author;
         this.category = category;
+        this.publishedAt = publishedAt;
     }
 
     public String getTitle() {
@@ -76,6 +86,14 @@ public class Post extends BaseEntity {
         this.content = content;
     }
 
+    public String getTldr() {
+        return tldr;
+    }
+
+    public void setTldr(String tldr) {
+        this.tldr = tldr;
+    }
+
     public PostStatus getStatus() {
         return status;
     }
@@ -84,11 +102,11 @@ public class Post extends BaseEntity {
         this.status = status;
     }
 
-    public User getAuthor() {
+    public Author getAuthor() {
         return author;
     }
 
-    public void setAuthor(User author) {
+    public void setAuthor(Author author) {
         this.author = author;
     }
 
@@ -106,5 +124,13 @@ public class Post extends BaseEntity {
 
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
+    }
+
+    public Instant getPublishedAt() {
+        return publishedAt;
+    }
+
+    public void setPublishedAt(Instant publishedAt) {
+        this.publishedAt = publishedAt;
     }
 }

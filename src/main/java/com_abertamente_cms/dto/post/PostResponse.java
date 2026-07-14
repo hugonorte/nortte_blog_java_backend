@@ -12,11 +12,13 @@ public record PostResponse(
         String title,
         String slug,
         String content,
+        String tldr,
         String imagePath,
         PostStatus status,
         UUID authorId,
         String authorName,
         CategoryResponse category,
+        java.time.Instant publishedAt,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
@@ -26,11 +28,13 @@ public record PostResponse(
                 post.getTitle(),
                 post.getSlug(),
                 post.getContent(),
+                post.getTldr(),
                 post.getImagePath(),
                 post.getStatus(),
                 post.getAuthor().getId(),
-                post.getAuthor().getName(),
+                post.getAuthor().getUser().getName(),
                 CategoryResponse.fromEntity(post.getCategory()),
+                post.getPublishedAt(),
                 post.getCreatedAt(),
                 post.getUpdatedAt()
         );
