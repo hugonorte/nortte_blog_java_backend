@@ -23,6 +23,9 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     Page<Post> findAll(Pageable pageable);
 
     @EntityGraph(attributePaths = {"author", "category"})
+    Page<Post> findByStatus(com_abertamente_cms.domain.PostStatus status, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"author", "category"})
     Page<Post> findByAuthorId(UUID authorId, Pageable pageable);
 
     @EntityGraph(attributePaths = {"author", "category"})

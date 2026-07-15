@@ -36,7 +36,10 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PostResponse> findAll(Pageable pageable) {
+    public Page<PostResponse> findAll(PostStatus status, Pageable pageable) {
+        if (status != null) {
+            return postRepository.findByStatus(status, pageable).map(PostResponse::fromEntity);
+        }
         return postRepository.findAll(pageable).map(PostResponse::fromEntity);
     }
 

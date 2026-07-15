@@ -75,7 +75,7 @@ class PostControllerTest {
         PostResponse response = buildResponse();
         Page<PostResponse> page = new PageImpl<>(Collections.singletonList(response), PageRequest.of(0, 10), 1);
 
-        when(postService.findAll(any(Pageable.class))).thenReturn(page);
+        when(postService.findAll(any(), any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/api/post"))
                 .andExpect(status().isOk())

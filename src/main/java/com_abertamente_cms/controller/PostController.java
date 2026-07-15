@@ -33,8 +33,10 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<PostResponse>> index(Pageable pageable) {
-        return ResponseEntity.ok(postService.findAll(pageable));
+    public ResponseEntity<Page<PostResponse>> index(
+            @RequestParam(required = false) PostStatus status, 
+            Pageable pageable) {
+        return ResponseEntity.ok(postService.findAll(status, pageable));
     }
 
     @GetMapping("/{id}")
