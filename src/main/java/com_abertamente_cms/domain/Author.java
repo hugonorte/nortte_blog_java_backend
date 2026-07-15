@@ -6,9 +6,13 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "authors")
+@SQLDelete(sql = "UPDATE authors SET deleted_at = CURRENT_TIMESTAMP WHERE id=?")
+@SQLRestriction("deleted_at IS NULL")
 public class Author extends BaseEntity {
 
     @Column(nullable = false)

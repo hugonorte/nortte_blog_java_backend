@@ -45,8 +45,8 @@ class AuthControllerTest {
 
     @Test
     void shouldRegisterUser() throws Exception {
-        RegisterRequest request = new RegisterRequest("Jane Doe", "jane@example.com", "password123");
-        AuthResponse response = new AuthResponse("jwt_token", "refresh_token", UUID.randomUUID(), "Jane Doe", "jane@example.com", "USER");
+        RegisterRequest request = new RegisterRequest("Jane", "Doe", "jane@example.com", "password123");
+        AuthResponse response = new AuthResponse("jwt_token", "refresh_token", UUID.randomUUID(), "Jane", "Doe", "jane@example.com", "USER");
 
         when(authService.register(any(RegisterRequest.class))).thenReturn(response);
 
@@ -61,7 +61,7 @@ class AuthControllerTest {
 
     @Test
     void shouldFailRegisterWhenEmailIsInvalid() throws Exception {
-        RegisterRequest request = new RegisterRequest("Jane Doe", "invalid-email", "password123");
+        RegisterRequest request = new RegisterRequest("Jane", "Doe", "invalid-email", "password123");
 
         mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -75,7 +75,7 @@ class AuthControllerTest {
     @Test
     void shouldLoginUser() throws Exception {
         LoginRequest request = new LoginRequest("jane@example.com", "password123");
-        AuthResponse response = new AuthResponse("jwt_token", "refresh_token", UUID.randomUUID(), "Jane Doe", "jane@example.com", "USER");
+        AuthResponse response = new AuthResponse("jwt_token", "refresh_token", UUID.randomUUID(), "Jane", "Doe", "jane@example.com", "USER");
 
         when(authService.login(any(LoginRequest.class))).thenReturn(response);
 
@@ -110,7 +110,7 @@ class AuthControllerTest {
     @Test
     void shouldLogout() throws Exception {
         com_abertamente_cms.domain.RefreshToken token = new com_abertamente_cms.domain.RefreshToken();
-        com_abertamente_cms.domain.User user = new com_abertamente_cms.domain.User("Test", "test@example.com", "pass");
+        com_abertamente_cms.domain.User user = new com_abertamente_cms.domain.User("Test", "User", "test@example.com", "pass");
         user.setId(UUID.randomUUID());
         token.setUser(user);
         token.setToken("old_refresh_token");
@@ -126,16 +126,16 @@ class AuthControllerTest {
 
     @Test
     void shouldReturnMe() throws Exception {
-        com_abertamente_cms.dto.user.UserDto userDto = new com_abertamente_cms.dto.user.UserDto(UUID.randomUUID(), "John Doe", "john@example.com", "USER");
+        com_abertamente_cms.dto.user.UserDto userDto = new com_abertamente_cms.dto.user.UserDto(UUID.randomUUID(), "John", "Doe", "john@example.com", "USER");
         when(authService.getMe()).thenReturn(userDto);
 
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/auth/me"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("John Doe"))
+                .andExpect(jsonPath("$.first_name").value("John"))
                 .andExpect(jsonPath("$.email").value("john@example.com"));
 
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/api/auth/me"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("John Doe"));
+                .andExpect(jsonPath("$.first_name").value("John"));
     }
 }

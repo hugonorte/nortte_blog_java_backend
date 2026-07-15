@@ -2,26 +2,29 @@ package com_abertamente_cms.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Collections;
 
 @Entity
 @Table(name = "users")
+@SQLDelete(sql = "UPDATE users SET deleted_at = CURRENT_TIMESTAMP WHERE id=?")
+@SQLRestriction("deleted_at IS NULL")
 public class User extends BaseEntity implements UserDetails {
 
-    @Column(nullable = false)
-    private String name;
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
+
+    @Column(name = "last_name")
+    private String lastName;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -32,29 +35,34 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "avatar_path")
     private String avatarPath;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles = new HashSet<>();
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    private UserRole role;
 
     public User() {
     }
 
-    public User(String name, String email, String password) {
-        this.name = name;
+    public User(String firstName, String lastName, String email, String password) {
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.email = email;
         this.password = password;
     }
 
-    public String getName() {
-        return name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getEmail() {
@@ -74,12 +82,12 @@ public class User extends BaseEntity implements UserDetails {
         this.password = password;
     }
 
-    public Set<Role> getRoles() {
-        return roles;
+    public UserRole getRole() {
+        return role;
     }
 
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
+    public void setRole(UserRole role) {
+        this.role = role;
     }
 
     public String getAvatarPath() {
@@ -92,9 +100,10 @@ public class User extends BaseEntity implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName().toUpperCase()))
-                .collect(Collectors.toList());
+        if (this.role == null) {
+            return Collections.emptyList();
+        }
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
     }
 
     @Override

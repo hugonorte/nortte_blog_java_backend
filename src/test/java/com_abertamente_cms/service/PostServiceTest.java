@@ -63,7 +63,7 @@ class PostServiceTest {
 
     @BeforeEach
     void setUp() {
-        user = new User("Jane", "jane@example.com", "pass");
+        user = new User("Jane", "Doe", "jane@example.com", "pass");
         ReflectionTestUtils.setField(user, "id", UUID.randomUUID());
 
         author = new com_abertamente_cms.domain.Author("Author Name", "author@example.com", "Bio", "Dev");

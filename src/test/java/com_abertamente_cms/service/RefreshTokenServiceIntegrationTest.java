@@ -2,6 +2,7 @@ package com_abertamente_cms.service;
 
 import com_abertamente_cms.domain.RefreshToken;
 import com_abertamente_cms.domain.User;
+import com_abertamente_cms.domain.UserRole;
 import com_abertamente_cms.repository.RefreshTokenRepository;
 import com_abertamente_cms.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +35,8 @@ class RefreshTokenServiceIntegrationTest {
     @BeforeEach
     void setUp() {
         // Preparar um usuário real no banco de dados em memória (H2/Testcontainers)
-        User user = new User("Integration User", "integration@example.com", "password");
+        User user = new User("Integration", "User", "integration@example.com", "password");
+        user.setRole(UserRole.USER);
         savedUser = userRepository.saveAndFlush(user);
     }
 

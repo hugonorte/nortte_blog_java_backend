@@ -1,7 +1,7 @@
 package com_abertamente_cms.repository;
 
-import com_abertamente_cms.domain.Role;
 import com_abertamente_cms.domain.User;
+import com_abertamente_cms.domain.UserRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -12,11 +12,15 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.springframework.context.annotation.Import;
+import com_abertamente_cms.AbertamenteCmsApplication;
 
 @DataJpaTest
 @ActiveProfiles("test")
+@Import(com_abertamente_cms.config.JpaAuditingConfig.class)
 class UserRepositoryTest {
 
     @Autowired
@@ -26,13 +30,10 @@ class UserRepositoryTest {
     private UserRepository userRepository;
 
     @Test
-    void shouldFindUserByEmailWithRolesEagerlyLoaded() {
+    void shouldFindUserByEmailWithRoleEagerlyLoaded() {
         // Arrange
-        Role roleAdmin = new Role("ADMIN");
-        entityManager.persist(roleAdmin);
-
-        User user = new User("John Doe", "john.doe@example.com", "password123");
-        user.setRoles(Set.of(roleAdmin));
+        User user = new User("John", "Doe", "john.doe@example.com", "password123");
+        user.setRole(UserRole.ADMIN);
         entityManager.persist(user);
         entityManager.flush();
         entityManager.clear(); // Clear persistence context to force a query
@@ -43,13 +44,12 @@ class UserRepositoryTest {
         // Assert
         assertTrue(foundUserOpt.isPresent());
         User foundUser = foundUserOpt.get();
-        assertEquals("John Doe", foundUser.getName());
+        assertEquals("John", foundUser.getFirstName());
         
         // This will throw LazyInitializationException if @EntityGraph is not working 
         // and we are outside a transaction (though @DataJpaTest is transactional by default).
         // However, we can assert the roles are initialized.
-        assertFalse(foundUser.getRoles().isEmpty());
-        assertEquals(1, foundUser.getRoles().size());
-        assertEquals("ADMIN", foundUser.getRoles().iterator().next().getName());
+        assertNotNull(foundUser.getRole());
+        assertEquals(UserRole.ADMIN, foundUser.getRole());
     }
 }

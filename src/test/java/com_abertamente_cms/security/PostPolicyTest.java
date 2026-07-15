@@ -1,7 +1,6 @@
 package com_abertamente_cms.security;
 
 import com_abertamente_cms.domain.Post;
-import com_abertamente_cms.domain.Role;
 import com_abertamente_cms.domain.User;
 import com_abertamente_cms.repository.PostRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,13 +43,13 @@ class PostPolicyTest {
 
     @BeforeEach
     void setUp() {
-        userAuthor = new User("Author", "author@example.com", "pass");
+        userAuthor = new User("Author", "", "author@example.com", "pass");
         ReflectionTestUtils.setField(userAuthor, "id", UUID.randomUUID());
         
         author = new com_abertamente_cms.domain.Author("Author Name", "author@example.com", "bio", "title");
         ReflectionTestUtils.setField(author, "id", UUID.randomUUID());
 
-        otherUser = new User("Other", "other@example.com", "pass");
+        otherUser = new User("Other", "", "other@example.com", "pass");
         ReflectionTestUtils.setField(otherUser, "id", UUID.randomUUID());
 
         post = new Post();

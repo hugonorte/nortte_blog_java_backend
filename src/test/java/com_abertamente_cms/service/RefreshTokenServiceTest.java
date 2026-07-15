@@ -43,7 +43,7 @@ class RefreshTokenServiceTest {
     void setUp() {
         ReflectionTestUtils.setField(refreshTokenService, "refreshTokenDurationMs", 86400000L); // 1 day
         userId = UUID.randomUUID();
-        user = new User("John Doe", "john@example.com", "pass");
+        user = new User("John", "Doe", "john@example.com", "pass");
         ReflectionTestUtils.setField(user, "id", userId);
     }
 

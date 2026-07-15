@@ -57,7 +57,7 @@ class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
-        user = new User("Jane Doe", "jane@example.com", "encoded_pass");
+        user = new User("Jane", "Doe", "jane@example.com", "encoded_pass");
         ReflectionTestUtils.setField(user, "id", UUID.randomUUID());
 
         refreshToken = new RefreshToken();
@@ -67,7 +67,7 @@ class AuthServiceTest {
 
     @Test
     void shouldRegisterUserSuccessfully() {
-        RegisterRequest request = new RegisterRequest("Jane Doe", "jane@example.com", "password123");
+        RegisterRequest request = new RegisterRequest("Jane", "Doe", "jane@example.com", "password123");
 
         when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
         when(passwordEncoder.encode(request.password())).thenReturn("encoded_pass");
@@ -85,7 +85,7 @@ class AuthServiceTest {
 
     @Test
     void shouldThrowExceptionWhenRegisteringExistingEmail() {
-        RegisterRequest request = new RegisterRequest("Jane Doe", "jane@example.com", "password123");
+        RegisterRequest request = new RegisterRequest("Jane", "Doe", "jane@example.com", "password123");
         when(userRepository.findByEmail(request.email())).thenReturn(Optional.of(user));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> authService.register(request));

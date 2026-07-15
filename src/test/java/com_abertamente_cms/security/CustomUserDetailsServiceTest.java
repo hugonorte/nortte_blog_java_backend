@@ -29,7 +29,7 @@ class CustomUserDetailsServiceTest {
     @Test
     void shouldReturnUserDetailsWhenUserExists() {
         String email = "test@example.com";
-        User user = new User("Test User", email, "encodedPassword");
+        User user = new User("Test", "User", email, "encodedPassword");
         
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 

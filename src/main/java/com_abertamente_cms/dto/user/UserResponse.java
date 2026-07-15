@@ -1,14 +1,15 @@
 package com_abertamente_cms.dto.user;
-
-import com_abertamente_cms.domain.Role;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com_abertamente_cms.domain.User;
+import com_abertamente_cms.domain.UserRole;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record UserResponse(
         UUID id,
-        String name,
+        @JsonProperty("first_name") String firstName,
+        @JsonProperty("last_name") String lastName,
         String email,
         String avatarPath,
         String role,
@@ -17,16 +18,17 @@ public record UserResponse(
         LocalDateTime updatedAt
 ) {
     public static UserResponse fromEntity(User user) {
-        String role = user.getRoles().stream().findFirst().map(Role::getName).orElse("");
-        String roleLabel = user.getRoles().stream().findFirst().map(Role::getName).orElse("");
+        String roleStr = user.getRole() != null ? user.getRole().name() : "";
+        String roleLabelStr = user.getRole() != null ? user.getRole().getDescription() : "";
 
         return new UserResponse(
                 user.getId(),
-                user.getName(),
+                user.getFirstName(),
+                user.getLastName(),
                 user.getEmail(),
                 user.getAvatarPath(),
-                role,
-                roleLabel,
+                roleStr,
+                roleLabelStr,
                 user.getCreatedAt(),
                 user.getUpdatedAt()
         );

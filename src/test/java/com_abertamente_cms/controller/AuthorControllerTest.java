@@ -15,14 +15,23 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import java.util.Collections;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthorController.class)
@@ -85,11 +94,12 @@ class AuthorControllerTest {
 
     @Test
     void shouldGetAllAuthors() throws Exception {
-        when(authorService.getAllAuthors()).thenReturn(java.util.List.of(response));
+        Page<AuthorResponse> page = new PageImpl<>(Collections.singletonList(response), PageRequest.of(0, 10), 1);
+        when(authorService.getAllAuthors(any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/api/author"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(authorId.toString()));
+                .andExpect(jsonPath("$.content[0].id").value(authorId.toString()));
     }
 
     @Test
@@ -107,5 +117,29 @@ class AuthorControllerTest {
 
         mockMvc.perform(get("/api/author/" + UUID.randomUUID()))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldUpdateAuthor() throws Exception {
+        AuthorRequest request = new AuthorRequest("Jane Edit", "jane.edit@example.com", "Bio", "Title", "Twitter", "handle");
+        AuthorResponse updatedResponse = new AuthorResponse(authorId, "Jane Edit", "jane.edit@example.com", "Bio", "Title", "Twitter", "handle");
+
+        when(authorService.update(eq(authorId), any(AuthorRequest.class))).thenReturn(updatedResponse);
+
+        mockMvc.perform(patch("/api/author/" + authorId)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Jane Edit"));
+    }
+
+    @Test
+    void shouldDeleteAuthor() throws Exception {
+        doNothing().when(authorService).delete(authorId);
+
+        mockMvc.perform(delete("/api/author/" + authorId)
+                        .with(csrf()))
+                .andExpect(status().isNoContent());
     }
 }

@@ -15,6 +15,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -98,13 +104,39 @@ class AuthorServiceTest {
     
     @Test
     void shouldGetAllAuthors() {
-        when(authorRepository.findAll()).thenReturn(List.of(author));
+        Page<Author> page = new PageImpl<>(Collections.singletonList(author), PageRequest.of(0, 10), 1);
+        when(authorRepository.findAll(any(Pageable.class))).thenReturn(page);
 
-        List<AuthorResponse> response = authorService.getAllAuthors();
+        Page<AuthorResponse> response = authorService.getAllAuthors(PageRequest.of(0, 10));
 
         assertNotNull(response);
         assertFalse(response.isEmpty());
-        assertEquals(1, response.size());
-        assertEquals(author.getId(), response.get(0).id());
+        assertEquals(1, response.getContent().size());
+        assertEquals(author.getId(), response.getContent().get(0).id());
+    }
+
+    @Test
+    void shouldUpdateAuthorSuccessfully() {
+        AuthorRequest request = new AuthorRequest("Jane Edit", "jane.edit@example.com", "Bio Edit", "Title Edit", "LinkedIn", "jane.edit");
+
+        when(authorRepository.findById(author.getId())).thenReturn(Optional.of(author));
+        when(authorRepository.findByEmail("jane.edit@example.com")).thenReturn(Optional.empty());
+        when(authorRepository.save(any(Author.class))).thenAnswer(i -> i.getArgument(0));
+
+        AuthorResponse response = authorService.update(author.getId(), request);
+
+        assertNotNull(response);
+        assertEquals("Jane Edit", response.name());
+        assertEquals("jane.edit@example.com", response.email());
+        verify(authorRepository, times(1)).save(any(Author.class));
+    }
+
+    @Test
+    void shouldDeleteAuthorSuccessfully() {
+        when(authorRepository.findById(author.getId())).thenReturn(Optional.of(author));
+
+        authorService.delete(author.getId());
+
+        verify(authorRepository, times(1)).delete(author);
     }
 }

@@ -2,6 +2,7 @@ package com_abertamente_cms.service;
 
 import com_abertamente_cms.domain.RefreshToken;
 import com_abertamente_cms.domain.User;
+import com_abertamente_cms.domain.UserRole;
 import com_abertamente_cms.dto.auth.AuthResponse;
 import com_abertamente_cms.dto.auth.LoginRequest;
 import com_abertamente_cms.dto.auth.RegisterRequest;
@@ -42,7 +43,8 @@ public class AuthService {
             throw new IllegalArgumentException("E-mail já está em uso.");
         }
 
-        User user = new User(request.name(), request.email(), passwordEncoder.encode(request.password()));
+        User user = new User(request.firstName(), request.lastName(), request.email(), passwordEncoder.encode(request.password()));
+        user.setRole(UserRole.USER);
         user = userRepository.save(user);
 
         return authenticateAndGenerateTokens(user);
@@ -77,20 +79,21 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
         
-        String role = user.getRoles().stream().findFirst().map(r -> r.getName()).orElse("USER");
-        return new UserDto(user.getId(), user.getName(), user.getEmail(), role);
+        String role = user.getRole() != null ? user.getRole().name() : "USER";
+        return new UserDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), role);
     }
 
     private AuthResponse authenticateAndGenerateTokens(User user) {
         String jwtToken = jwtService.generateToken(user);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
-        String role = user.getRoles().stream().findFirst().map(r -> r.getName()).orElse("USER");
+        String role = user.getRole() != null ? user.getRole().name() : "USER";
 
         return new AuthResponse(
                 jwtToken,
                 refreshToken.getToken(),
                 user.getId(),
-                user.getName(),
+                user.getFirstName(),
+                user.getLastName(),
                 user.getEmail(),
                 role
         );
