@@ -42,3 +42,5 @@ out/
 ### Environment Variables ###
 .env
 .env.production
+
+storage/uploads
