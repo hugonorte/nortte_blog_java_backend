@@ -44,3 +44,4 @@ out/
 .env.production
 
 storage/uploads
+ementa.md
