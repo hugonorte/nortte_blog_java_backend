@@ -5,19 +5,18 @@ import com_abertamente_cms.dto.auth.LoginRequest;
 import com_abertamente_cms.dto.auth.RegisterRequest;
 import com_abertamente_cms.dto.auth.TokenRefreshRequest;
 import com_abertamente_cms.dto.auth.TokenRefreshResponse;
+import com_abertamente_cms.dto.auth.ForgotPasswordRequest;
+import com_abertamente_cms.dto.auth.ResetPasswordRequest;
 import com_abertamente_cms.service.AuthService;
 import com_abertamente_cms.service.RefreshTokenService;
+import com_abertamente_cms.service.PasswordResetService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.UUID;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
@@ -30,11 +29,13 @@ public class AuthController {
 
     private final AuthService authService;
     private final RefreshTokenService refreshTokenService;
+    private final PasswordResetService passwordResetService;
     private static final String REFRESH_TOKEN_COOKIE = "refreshToken";
 
-    public AuthController(AuthService authService, RefreshTokenService refreshTokenService) {
+    public AuthController(AuthService authService, RefreshTokenService refreshTokenService, PasswordResetService passwordResetService) {
         this.authService = authService;
         this.refreshTokenService = refreshTokenService;
+        this.passwordResetService = passwordResetService;
     }
 
     private void addRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
@@ -71,6 +72,26 @@ public class AuthController {
         AuthResponse authResponse = authService.login(request);
         addRefreshTokenCookie(response, authResponse.refreshToken());
         return ResponseEntity.ok(authResponse);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        passwordResetService.requestPasswordReset(request.email());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        if (!request.password().equals(request.password_confirmation())) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        try {
+            passwordResetService.resetPassword(request.email(), request.token(), request.password());
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PostMapping("/refresh")

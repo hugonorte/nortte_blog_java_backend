@@ -6,6 +6,7 @@ import com_abertamente_cms.dto.auth.RegisterRequest;
 import com_abertamente_cms.security.JwtAuthenticationFilter;
 import com_abertamente_cms.service.AuthService;
 import com_abertamente_cms.service.RefreshTokenService;
+import com_abertamente_cms.service.PasswordResetService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,9 @@ class AuthControllerTest {
     // Precisamos mockar os filtros customizados que possam ser carregados pelo SecurityConfig
     @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+    
+    @MockBean
+    private PasswordResetService passwordResetService;
 
     @Test
     void shouldRegisterUser() throws Exception {
