@@ -65,4 +65,11 @@ public class PostController {
     public ResponseEntity<PostResponse> changeStatus(@PathVariable UUID id, @RequestParam PostStatus status) {
         return ResponseEntity.ok(postService.changeStatus(id, status));
     }
+
+    @PatchMapping("/{id}/content")
+    public ResponseEntity<PostResponse> updateContent(
+            @PathVariable UUID id, 
+            @Valid @RequestBody com_abertamente_cms.dto.post.PostContentUpdateRequest request) {
+        return ResponseEntity.ok(postService.updateContent(id, request));
+    }
 }

@@ -1,6 +1,7 @@
 package com_abertamente_cms.service;
 
 import com_abertamente_cms.domain.Category;
+import com_abertamente_cms.domain.ContentFormat;
 import com_abertamente_cms.domain.Post;
 import com_abertamente_cms.domain.PostStatus;
 import com_abertamente_cms.domain.User;
@@ -79,7 +80,7 @@ class PostServiceTest {
 
     @Test
     void shouldCreatePost() {
-        PostRequest request = new PostRequest("Título Novo", "titulo-novo", "conteudo", "tldr", "/uploads/posts/cover.jpg", java.time.Instant.now(), category.getId(), author.getId());
+        PostRequest request = new PostRequest("Título Novo", "titulo-novo", "conteudo", ContentFormat.HTML, "tldr", "/uploads/posts/cover.jpg", java.time.Instant.now(), category.getId(), author.getId());
 
         when(authorRepository.findById(author.getId())).thenReturn(Optional.of(author));
         when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
@@ -95,7 +96,7 @@ class PostServiceTest {
 
     @Test
     void shouldUpdatePost() {
-        PostRequest request = new PostRequest("Título Edit", "titulo-edit", "conteudo edit", "tldr edit", "/uploads/posts/cover.jpg", java.time.Instant.now(), category.getId(), author.getId());
+        PostRequest request = new PostRequest("Título Edit", "titulo-edit", "conteudo edit", ContentFormat.HTML, "tldr edit", "/uploads/posts/cover.jpg", java.time.Instant.now(), category.getId(), author.getId());
 
         when(postRepository.findById(postId)).thenReturn(Optional.of(post));
         when(postRepository.findBySlug(request.slug())).thenReturn(Optional.empty());

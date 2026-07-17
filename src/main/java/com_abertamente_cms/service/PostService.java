@@ -17,6 +17,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com_abertamente_cms.domain.ContentFormat;
+import com_abertamente_cms.dto.post.PostContentUpdateRequest;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
+import org.owasp.html.PolicyFactory;
+import org.owasp.html.Sanitizers;
 
 import java.util.UUID;
 
@@ -38,16 +44,16 @@ public class PostService {
     @Transactional(readOnly = true)
     public Page<PostResponse> findAll(PostStatus status, Pageable pageable) {
         if (status != null) {
-            return postRepository.findByStatus(status, pageable).map(PostResponse::fromEntity);
+            return postRepository.findByStatus(status, pageable).map(this::toPostResponse);
         }
-        return postRepository.findAll(pageable).map(PostResponse::fromEntity);
+        return postRepository.findAll(pageable).map(this::toPostResponse);
     }
 
     @Transactional(readOnly = true)
     public PostResponse findById(UUID id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Artigo não encontrado."));
-        return PostResponse.fromEntity(post);
+        return toPostResponse(post);
     }
 
     @Transactional
@@ -62,11 +68,13 @@ public class PostService {
         com_abertamente_cms.domain.Author author = authorRepository.findById(request.authorId())
                 .orElseThrow(() -> new ResourceNotFoundException("Autor não encontrado."));
 
-        Post post = new Post(request.title(), request.slug(), request.content(), request.tldr(), author, category, request.publishedAt());
+        String safeContent = sanitizeInputIfHtml(request.content(), request.formatType());
+        Post post = new Post(request.title(), request.slug(), safeContent, request.tldr(), author, category, request.publishedAt());
+        post.setFormatType(request.formatType());
         post.setImagePath(request.imagePath());
         post = postRepository.save(post);
 
-        return PostResponse.fromEntity(post);
+        return toPostResponse(post);
     }
 
     @Transactional
@@ -84,13 +92,14 @@ public class PostService {
 
         post.setTitle(request.title());
         post.setSlug(request.slug());
-        post.setContent(request.content());
+        post.setContent(sanitizeInputIfHtml(request.content(), request.formatType()));
+        post.setFormatType(request.formatType());
         post.setTldr(request.tldr());
         post.setImagePath(request.imagePath());
         post.setCategory(category);
         post.setPublishedAt(request.publishedAt());
 
-        return PostResponse.fromEntity(postRepository.save(post));
+        return toPostResponse(postRepository.save(post));
     }
 
     @Transactional
@@ -108,6 +117,50 @@ public class PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("Artigo não encontrado."));
         
         post.setStatus(status);
-        return PostResponse.fromEntity(postRepository.save(post));
+        return toPostResponse(postRepository.save(post));
+    }
+    
+    @Transactional
+    @PreAuthorize("@postPolicy.canManage(authentication, #id)")
+    public PostResponse updateContent(UUID id, PostContentUpdateRequest request) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Artigo não encontrado."));
+        
+        post.setFormatType(request.formatType());
+        post.setContent(sanitizeInputIfHtml(request.content(), request.formatType()));
+        return toPostResponse(postRepository.save(post));
+    }
+
+    private String sanitizeInputIfHtml(String content, ContentFormat formatType) {
+        if (content == null || content.isEmpty()) return content;
+        if (formatType == ContentFormat.HTML) {
+            PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.LINKS).and(Sanitizers.BLOCKS).and(Sanitizers.IMAGES).and(Sanitizers.STYLES).and(Sanitizers.TABLES);
+            return policy.sanitize(content);
+        }
+        return content;
+    }
+
+    private String processHtmlContent(Post post) {
+        String rawContent = post.getContent();
+        if (rawContent == null || rawContent.isEmpty()) {
+            return "";
+        }
+        
+        String html;
+        if (post.getFormatType() == ContentFormat.MARKDOWN) {
+            Parser parser = Parser.builder().build();
+            HtmlRenderer renderer = HtmlRenderer.builder().build();
+            html = renderer.render(parser.parse(rawContent));
+        } else {
+            html = rawContent;
+        }
+
+        PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.LINKS).and(Sanitizers.BLOCKS).and(Sanitizers.IMAGES).and(Sanitizers.STYLES).and(Sanitizers.TABLES);
+        return policy.sanitize(html);
+    }
+    
+    private PostResponse toPostResponse(Post post) {
+        String processedHtml = processHtmlContent(post);
+        return PostResponse.fromEntity(post, processedHtml);
     }
 }

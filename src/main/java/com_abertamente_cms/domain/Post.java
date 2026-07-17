@@ -41,6 +41,11 @@ public class Post extends BaseEntity {
     @Column(nullable = false)
     private PostStatus status = PostStatus.DRAFT;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "format_type", nullable = false)
+    private ContentFormat formatType = ContentFormat.HTML;
+
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "author_id", nullable = false)
     private Author author;
@@ -132,5 +137,13 @@ public class Post extends BaseEntity {
 
     public void setPublishedAt(Instant publishedAt) {
         this.publishedAt = publishedAt;
+    }
+
+    public ContentFormat getFormatType() {
+        return formatType;
+    }
+
+    public void setFormatType(ContentFormat formatType) {
+        this.formatType = formatType;
     }
 }

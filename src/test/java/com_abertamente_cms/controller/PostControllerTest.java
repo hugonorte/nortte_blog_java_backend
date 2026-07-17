@@ -58,6 +58,8 @@ class PostControllerTest {
                 "Title",
                 "title",
                 "Content",
+                "<p>Content</p>",
+                com_abertamente_cms.domain.ContentFormat.HTML,
                 "tldr",
                 "/uploads/posts/cover.jpg",
                 PostStatus.DRAFT,
@@ -96,7 +98,7 @@ class PostControllerTest {
 
     @Test
     void testStore() throws Exception {
-        PostRequest request = new PostRequest("Title", "title", "Content", "tldr", "/uploads/posts/cover.jpg", java.time.Instant.now(), UUID.randomUUID(), UUID.randomUUID());
+        PostRequest request = new PostRequest("Title", "title", "Content", com_abertamente_cms.domain.ContentFormat.HTML, "tldr", "/uploads/posts/cover.jpg", java.time.Instant.now(), UUID.randomUUID(), UUID.randomUUID());
         PostResponse response = buildResponse();
 
         when(postService.create(any(PostRequest.class))).thenReturn(response);
@@ -111,10 +113,10 @@ class PostControllerTest {
     @Test
     void testUpdate() throws Exception {
         UUID postId = UUID.randomUUID();
-        PostRequest request = new PostRequest("Title Edit", "title-edit", "Content", "tldr edit", "/uploads/posts/cover.jpg", java.time.Instant.now(), UUID.randomUUID(), UUID.randomUUID());
+        PostRequest request = new PostRequest("Title Edit", "title-edit", "Content", com_abertamente_cms.domain.ContentFormat.HTML, "tldr edit", "/uploads/posts/cover.jpg", java.time.Instant.now(), UUID.randomUUID(), UUID.randomUUID());
         
         CategoryResponse categoryResponse = new CategoryResponse(UUID.randomUUID(), "Tech", "tech", "desc", LocalDateTime.now(), null);
-        PostResponse response = new PostResponse(postId, "Title Edit", "title-edit", "Content", "tldr edit", "/uploads/posts/cover.jpg", PostStatus.DRAFT, UUID.randomUUID(), "Author", categoryResponse, java.time.Instant.now(), LocalDateTime.now(), null);
+        PostResponse response = new PostResponse(postId, "Title Edit", "title-edit", "Content", "<p>Content</p>", com_abertamente_cms.domain.ContentFormat.HTML, "tldr edit", "/uploads/posts/cover.jpg", PostStatus.DRAFT, UUID.randomUUID(), "Author", categoryResponse, java.time.Instant.now(), LocalDateTime.now(), null);
 
         when(postService.update(eq(postId), any(PostRequest.class))).thenReturn(response);
 
@@ -138,7 +140,7 @@ class PostControllerTest {
     void testChangeStatus() throws Exception {
         UUID postId = UUID.randomUUID();
         CategoryResponse categoryResponse = new CategoryResponse(UUID.randomUUID(), "Tech", "tech", "desc", LocalDateTime.now(), null);
-        PostResponse response = new PostResponse(postId, "Title", "title", "Content", "tldr", "/uploads/posts/cover.jpg", PostStatus.PUBLISHED, UUID.randomUUID(), "Author", categoryResponse, java.time.Instant.now(), LocalDateTime.now(), null);
+        PostResponse response = new PostResponse(postId, "Title", "title", "Content", "<p>Content</p>", com_abertamente_cms.domain.ContentFormat.HTML, "tldr", "/uploads/posts/cover.jpg", PostStatus.PUBLISHED, UUID.randomUUID(), "Author", categoryResponse, java.time.Instant.now(), LocalDateTime.now(), null);
 
         when(postService.changeStatus(postId, PostStatus.PUBLISHED)).thenReturn(response);
 

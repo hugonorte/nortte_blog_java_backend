@@ -17,6 +17,9 @@ public record PostRequest(
 
         String content,
 
+        @NotNull(message = "O formato de conteúdo é obrigatório")
+        com_abertamente_cms.domain.ContentFormat formatType,
+
         String tldr,
 
         String imagePath,
