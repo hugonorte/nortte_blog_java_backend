@@ -56,6 +56,13 @@ public class PostService {
         return toPostResponse(post);
     }
 
+    @Transactional(readOnly = true)
+    public PostResponse findBySlug(String slug) {
+        Post post = postRepository.findBySlug(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("Artigo não encontrado."));
+        return toPostResponse(post);
+    }
+
     @Transactional
     public PostResponse create(PostRequest request) {
         if (postRepository.findBySlug(request.slug()).isPresent()) {
