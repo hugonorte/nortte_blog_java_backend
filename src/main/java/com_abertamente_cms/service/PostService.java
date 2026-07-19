@@ -63,6 +63,13 @@ public class PostService {
         return toPostResponse(post);
     }
 
+    @Transactional(readOnly = true)
+    public com_abertamente_cms.dto.post.PostContentResponse findContentBySlug(String slug) {
+        Post post = postRepository.findBySlug(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("Artigo não encontrado."));
+        return com_abertamente_cms.dto.post.PostContentResponse.fromEntity(post, processHtmlContent(post));
+    }
+
     @Transactional
     public PostResponse create(PostRequest request) {
         if (postRepository.findBySlug(request.slug()).isPresent()) {

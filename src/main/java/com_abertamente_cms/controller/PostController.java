@@ -45,8 +45,8 @@ public class PostController {
     }
 
     @GetMapping("/slug/{slug}")
-    public ResponseEntity<PostResponse> showBySlug(@PathVariable String slug) {
-        return ResponseEntity.ok(postService.findBySlug(slug));
+    public ResponseEntity<com_abertamente_cms.dto.post.PostContentResponse> showBySlug(@PathVariable String slug) {
+        return ResponseEntity.ok(postService.findContentBySlug(slug));
     }
 
     @PostMapping
