@@ -1,5 +1,7 @@
 package com_abertamente_cms.exception;
 
+import io.sentry.Sentry;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.validation.FieldError;
@@ -74,6 +76,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleGenericException(Exception ex) {
+        Sentry.captureException(ex);
         ex.printStackTrace();
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Ocorreu um erro interno inesperado. Detalhes: " + ex.getMessage());
         problemDetail.setTitle("Erro Interno do Servidor");

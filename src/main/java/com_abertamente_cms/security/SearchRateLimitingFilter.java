@@ -1,6 +1,5 @@
 package com_abertamente_cms.security;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -14,7 +13,6 @@ import java.io.IOException;
 import java.time.Duration;
 
 @Component
-@ConditionalOnBean(StringRedisTemplate.class)
 public class SearchRateLimitingFilter extends OncePerRequestFilter {
 
     private final StringRedisTemplate redisTemplate;
