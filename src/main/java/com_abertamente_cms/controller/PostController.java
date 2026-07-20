@@ -24,12 +24,21 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/post")
+@org.springframework.validation.annotation.Validated
 public class PostController {
 
     private final PostService postService;
 
     public PostController(PostService postService) {
         this.postService = postService;
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<PostResponse>> search(
+            @RequestParam @jakarta.validation.constraints.Size(min = 3, message = "A busca deve ter pelo menos 3 caracteres") String query,
+            @RequestParam(required = false, name = "contact_email") String honeypot,
+            Pageable pageable) {
+        return ResponseEntity.ok(postService.searchPosts(query, honeypot, pageable));
     }
 
     @GetMapping

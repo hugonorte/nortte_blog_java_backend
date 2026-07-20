@@ -34,6 +34,11 @@ dependencies {
     // Markdown & HTML Sanitization
     implementation 'org.commonmark:commonmark:0.21.0'
     implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1'
+
+    // Rate Limiting (Redis + Bucket4j)
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'com.bucket4j:bucket4j-core:8.10.1'
+    implementation 'com.bucket4j:bucket4j-redis:8.10.1'
     
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-database-postgresql'

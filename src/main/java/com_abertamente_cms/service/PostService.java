@@ -69,6 +69,13 @@ public class PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("Artigo não encontrado."));
         return com_abertamente_cms.dto.post.PostContentResponse.fromEntity(post, processHtmlContent(post));
     }
+    @Transactional(readOnly = true)
+    public Page<PostResponse> searchPosts(String query, String honeypot, Pageable pageable) {
+        if (honeypot != null && !honeypot.trim().isEmpty()) {
+            return Page.empty(pageable); // Honeypot preenchido, é um bot
+        }
+        return postRepository.searchPosts(query, pageable).map(this::toPostResponse);
+    }
 
     @Transactional
     public PostResponse create(PostRequest request) {
