@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.annotation.PostConstruct;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -29,12 +28,9 @@ public class GcpFileStorageServiceImpl implements FileStorageService {
 
     @PostConstruct
     public void init() throws IOException {
-        String credentialsPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
-        if (credentialsPath == null || credentialsPath.isEmpty()) {
-            throw new IllegalArgumentException("A variável de ambiente GOOGLE_APPLICATION_CREDENTIALS não está configurada.");
-        }
-
-        GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream(credentialsPath));
+        // Tenta usar GOOGLE_APPLICATION_CREDENTIALS se existir, caso contrário
+        // usa as credenciais padrão do servidor (Metadata Server) no Cloud Run.
+        GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
         this.storage = StorageOptions.newBuilder()
                 .setCredentials(credentials)
                 .setProjectId(projectId)

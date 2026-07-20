@@ -1,0 +1,23 @@
+# Git
+.git
+.gitignore
+
+# Build files
+build/
+.gradle/
+out/
+bin/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+
+# Env files
+.env
+.env.*
+*.json
+
+# Other
+Dockerfile
+.dockerignore
