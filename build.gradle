@@ -44,6 +44,9 @@ dependencies {
     // Sentry Error Monitoring
     implementation 'io.sentry:sentry-spring-boot-starter-jakarta:7.10.0'
     
+    // Google Cloud Storage
+    implementation 'com.google.cloud:google-cloud-storage:2.38.0'
+    
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-database-postgresql'
     runtimeOnly 'org.postgresql:postgresql'
