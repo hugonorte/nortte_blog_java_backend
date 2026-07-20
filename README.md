@@ -14,6 +14,13 @@ Características principais:
 - 🗄️ **Banco de Dados**: Modelagem relacional robusta com PostgreSQL e controle de versão através do Flyway.
 - 📝 **Conteúdo**: Suporte à conversão e sanitização de conteúdos em Markdown.
 
+### 🛡️ Segurança Avançada (Sistema de Busca FTS)
+
+Para proteger a rota pública de busca de publicações contra robôs, web-scrapers e ataques DDoS na camada de aplicação, implementamos um sistema de **Defesa em Profundidade (Defense in Depth)** com duas barreiras ultrarrápidas:
+
+1. **Honeypot Invisível**: Um campo de formulário falso injetado no frontend, totalmente imperceptível para humanos. Se um bot genérico o preencher na rota de busca, o backend identifica imediatamente a automação e encerra a requisição sem sequer tocar no banco de dados.
+2. **Rate Limiting (Redis & Bucket4j)**: Para proteção contra ataques massivos e volumétricos. Com base no algoritmo *Token Bucket* via Redis, rastreamos o IP de origem e limitamos a **5 requisições de busca a cada 10 segundos** por usuário. Quem exceder a cota recebe instantaneamente o erro `HTTP 429 Too Many Requests`.
+
 ---
 
 ## 🛠️ Stack Tecnológica
