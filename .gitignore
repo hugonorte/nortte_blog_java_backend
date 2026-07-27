@@ -45,6 +45,6 @@ out/
 
 storage/uploads
 ementa.md
-modulo*
+modulo*.md
 # GCP Service Accounts
 *.json
