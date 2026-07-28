@@ -81,15 +81,20 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
+        List<String> cleanedOrigins = allowedOrigins.stream()
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
+        
         // Se as origens tiverem um asterisco, tratamos diferente para permitir AllowCredentials sem quebrar
-        if (allowedOrigins.contains("*")) {
+        if (cleanedOrigins.contains("*")) {
             configuration.setAllowedOriginPatterns(List.of("*"));
         } else {
-            configuration.setAllowedOrigins(allowedOrigins);
+            configuration.setAllowedOrigins(cleanedOrigins);
         }
         
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
+        configuration.setAllowedHeaders(List.of("*")); // Permitir headers do Sentry (sentry-trace, baggage, etc.)
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
