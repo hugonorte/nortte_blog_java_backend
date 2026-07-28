@@ -50,6 +50,7 @@ public class AuthService {
         return authenticateAndGenerateTokens(user);
     }
 
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password())
@@ -61,6 +62,7 @@ public class AuthService {
         return authenticateAndGenerateTokens(user);
     }
 
+    @Transactional
     public TokenRefreshResponse refreshToken(TokenRefreshRequest request) {
         String requestRefreshToken = request.refreshToken();
 
@@ -74,6 +76,7 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("Refresh token não está no banco de dados!"));
     }
 
+    @Transactional(readOnly = true)
     public UserDto getMe() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email)
