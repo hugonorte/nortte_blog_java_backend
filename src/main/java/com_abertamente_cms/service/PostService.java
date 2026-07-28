@@ -23,6 +23,7 @@ import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
+import org.owasp.html.HtmlPolicyBuilder;
 
 import java.util.UUID;
 
@@ -152,11 +153,25 @@ public class PostService {
         return toPostResponse(postRepository.save(post));
     }
 
+    private PolicyFactory getSanitizerPolicy() {
+        PolicyFactory customPolicy = new HtmlPolicyBuilder()
+                .allowElements("pre", "code")
+                .allowAttributes("class").onElements("pre", "code")
+                .toFactory();
+                
+        return Sanitizers.FORMATTING
+                .and(Sanitizers.LINKS)
+                .and(Sanitizers.BLOCKS)
+                .and(Sanitizers.IMAGES)
+                .and(Sanitizers.STYLES)
+                .and(Sanitizers.TABLES)
+                .and(customPolicy);
+    }
+
     private String sanitizeInputIfHtml(String content, ContentFormat formatType) {
         if (content == null || content.isEmpty()) return content;
         if (formatType == ContentFormat.HTML) {
-            PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.LINKS).and(Sanitizers.BLOCKS).and(Sanitizers.IMAGES).and(Sanitizers.STYLES).and(Sanitizers.TABLES);
-            return policy.sanitize(content);
+            return getSanitizerPolicy().sanitize(content);
         }
         return content;
     }
@@ -176,8 +191,7 @@ public class PostService {
             html = rawContent;
         }
 
-        PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.LINKS).and(Sanitizers.BLOCKS).and(Sanitizers.IMAGES).and(Sanitizers.STYLES).and(Sanitizers.TABLES);
-        return policy.sanitize(html);
+        return getSanitizerPolicy().sanitize(html);
     }
     
     private PostResponse toPostResponse(Post post) {
