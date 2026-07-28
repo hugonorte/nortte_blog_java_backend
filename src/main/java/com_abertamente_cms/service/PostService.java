@@ -114,6 +114,11 @@ public class PostService {
 
         post.setTitle(request.title());
         post.setSlug(request.slug());
+        
+        System.out.println("--- DEBUG BACKEND: Conteúdo recebido ---");
+        System.out.println(request.content());
+        System.out.println("--- FIM DEBUG ---");
+        
         post.setContent(sanitizeInputIfHtml(request.content(), request.formatType()));
         post.setFormatType(request.formatType());
         post.setTldr(request.tldr());
@@ -155,8 +160,8 @@ public class PostService {
 
     private PolicyFactory getSanitizerPolicy() {
         PolicyFactory customPolicy = new HtmlPolicyBuilder()
-                .allowElements("pre", "code")
-                .allowAttributes("class").onElements("pre", "code")
+                .allowElements("pre", "code", "span")
+                .allowAttributes("class").globally()
                 .toFactory();
                 
         return Sanitizers.FORMATTING
