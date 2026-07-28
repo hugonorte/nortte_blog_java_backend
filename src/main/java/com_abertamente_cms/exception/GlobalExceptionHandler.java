@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,6 +72,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
         problemDetail.setTitle("Conflito / Parâmetro Inválido");
         problemDetail.setType(URI.create("https://abertamente.net/erros/conflito"));
+        return problemDetail;
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        String message = "Erro de integridade de dados.";
+        Throwable rootCause = ex.getMostSpecificCause();
+        if (rootCause != null && rootCause.getMessage() != null && rootCause.getMessage().contains("users_email_key")) {
+            message = "E-mail já está em uso.";
+        }
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, message);
+        problemDetail.setTitle("Conflito de Dados");
+        problemDetail.setType(URI.create("https://abertamente.net/erros/conflito-dados"));
         return problemDetail;
     }
 
