@@ -7,6 +7,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import org.springframework.dao.DataIntegrityViolationException;
+
 import java.util.Optional;
 
 @Component
@@ -27,14 +29,20 @@ public class DatabaseSeeder implements CommandLineRunner {
         Optional<User> adminOpt = userRepository.findByEmail(adminEmail);
 
         if (adminOpt.isEmpty()) {
-            User admin = new User(
-                    "Admin", "User",
-                    adminEmail,
-                    passwordEncoder.encode("**********") // Senha provisória
-            );
-            admin.setRole(UserRole.ADMIN);
-            userRepository.save(admin);
-            System.out.println("Usuário Admin semeado: " + adminEmail + " / **********");
+            try {
+                User admin = new User(
+                        "Admin", "User",
+                        adminEmail,
+                        passwordEncoder.encode("**********") // Senha provisória
+                );
+                admin.setRole(UserRole.ADMIN);
+                userRepository.save(admin);
+                System.out.println("Usuário Admin semeado: " + adminEmail + " / **********");
+            } catch (DataIntegrityViolationException e) {
+                System.out.println("Usuário Admin já existe no banco (possivelmente deletado logicamente). Ignorando seed para não quebrar a inicialização.");
+            } catch (Exception e) {
+                System.out.println("Erro inesperado ao semear o usuário admin: " + e.getMessage());
+            }
         }
     }
 }
