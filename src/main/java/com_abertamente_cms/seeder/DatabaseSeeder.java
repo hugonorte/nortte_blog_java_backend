@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import org.springframework.dao.DataIntegrityViolationException;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import java.util.Optional;
 
 @Component
@@ -16,6 +18,12 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${app.seed.admin-email}")
+    private String adminEmail;
+
+    @Value("${app.seed.admin-password}")
+    private String adminPassword;
 
     public DatabaseSeeder(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -25,7 +33,6 @@ public class DatabaseSeeder implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // 1. Criar Usuário Admin inicial (se não existir)
-        String adminEmail = "admin@abertamente.com";
         Optional<User> adminOpt = userRepository.findByEmail(adminEmail);
 
         if (adminOpt.isEmpty()) {
@@ -33,11 +40,11 @@ public class DatabaseSeeder implements CommandLineRunner {
                 User admin = new User(
                         "Admin", "User",
                         adminEmail,
-                        passwordEncoder.encode("**********") // Senha provisória
+                        passwordEncoder.encode(adminPassword) // Senha via env var
                 );
                 admin.setRole(UserRole.ADMIN);
                 userRepository.save(admin);
-                System.out.println("Usuário Admin semeado: " + adminEmail + " / **********");
+                System.out.println("Usuário Admin semeado: " + adminEmail);
             } catch (DataIntegrityViolationException e) {
                 System.out.println("Usuário Admin já existe no banco (possivelmente deletado logicamente). Ignorando seed para não quebrar a inicialização.");
             } catch (Exception e) {
