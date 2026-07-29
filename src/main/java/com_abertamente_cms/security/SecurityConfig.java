@@ -83,6 +83,8 @@ public class SecurityConfig {
         
         List<String> cleanedOrigins = allowedOrigins.stream()
                 .map(String::trim)
+                .map(s -> s.replaceAll("^\"|\"$", "")) // Remove aspas duplas no início e fim
+                .map(s -> s.replaceAll("^'|'$", ""))   // Remove aspas simples no início e fim
                 .filter(s -> !s.isEmpty())
                 .toList();
         
@@ -94,7 +96,7 @@ public class SecurityConfig {
         }
         
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*")); // Permitir headers do Sentry (sentry-trace, baggage, etc.)
+        configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type", "sentry-trace", "baggage", "Accept", "Origin", "X-Requested-With"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
